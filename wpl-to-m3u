@@ -19,9 +19,6 @@
 #
 # Dependencies:
 # =============
-# grep
-# sed
-# cut
 # recode - http://www.gnu.org/software/recode/
 #
 
@@ -92,8 +89,8 @@ if [ $usage == 1 ]; then
 	echo
 	exit
 
-elif [ $directory == 1 ]; then
-
+elif [ $directory == 1 ]; 
+then
 	OIFS="$IFS"
 	IFS=$'\n'
 
@@ -105,11 +102,8 @@ elif [ $directory == 1 ]; then
 	done
 	
 	IFS="$OIFS"
-
 else
-
 	wpltom3u "$wpl" "$m3u"
-	
 fi
 
 
