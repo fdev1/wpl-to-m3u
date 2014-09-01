@@ -1,0 +1,107 @@
+#!/bin/sh
+
+#
+# wpl-2-m3u - Converts Windows Media Player WPL Playlists to M3U
+#
+# Requieres:
+# ==========
+# grep
+# sed
+# recode - http://www.gnu.org/software/recode/
+#
+
+directory=0
+verbose=0
+usage=0
+wpl=""
+m3u=""
+
+wpltom3u() 
+{
+	if [ $verbose == 1 ]; then
+		echo "Converting "$1" to "$2"...";
+	fi
+
+	sed ':a; N; $!ba; s/\n//g; s/\r//g; s/>/>\n/g' "$1" |
+	grep "<media src" |
+	sed 's/\t/ /g; 	s/^ *//; s/ *$//; s/<media src="*"//; s/\\/\//g;' | 
+	cut -d'"' -f1 |
+	recode html..ascii > "$2"
+}
+
+
+while [ $# -gt 0 ]; 
+do
+
+	if [ "$1" == "--verbose" ] || [ "$1" == "-v" ];
+	then
+		verbose=1;
+
+	elif [ "$1" == "--directory" ] || [ "$1" == "-d" ];
+	then
+		directory=1;
+
+	elif [ "$1" == "--help" ];
+	then
+		usage=1;
+
+	elif [ "$#" == "2" ]; then
+
+		wpl=$1
+		#m3u=$1
+
+	elif [ "$#" == "1" ]; then
+		m3u=$1
+	fi
+
+	shift
+
+done
+
+if [ "$wpl" == "" ] && [ "$m3u" == "" ]; then
+	usage=1;
+elif [ "$wpl" == "" ]; then
+	usage=1;
+fi
+
+
+if [ $usage == 1 ]; then
+
+	echo "Copyright (c) 2014"
+	echo "Usage: wpl-to-m3u [options] input output"
+	echo
+	echo "Options:"
+	echo -e "\t--verbose\t\tVerbose Mode"
+	echo -e "\t--directory\t\tDirectory Mode"
+	echo
+	exit
+
+elif [ $directory == 1 ]; then
+
+	OIFS="$IFS"
+	IFS=$'\n'
+
+	for file in $(find $wpl -type f -name "*.wpl"); do
+
+		output_file=$(basename $file)
+		output_file=${m3u%%/}/${output_file%.*}.m3u
+		wpltom3u "$file" "$output_file"
+
+		#echo "Converting '"$file"' to '"$output_file"'"
+
+
+
+	done
+	
+	IFS="$OIFS"
+
+else
+
+	wpltom3u "$wpl" "$m3u"
+	
+fi
+
+
+
+
+
